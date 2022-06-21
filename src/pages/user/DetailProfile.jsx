@@ -17,7 +17,8 @@ import DatePicker from "react-mobile-datepicker";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { NAME_APP, VERSION_APP } from "../../constants/config";
-import { SEND_TOKEN_FIREBASE } from "../../constants/prom21";
+import { REMOVE_BADGE, SEND_TOKEN_FIREBASE, SET_BADGE } from "../../constants/prom21";
+import { iOS } from "../../constants/helpers";
 
 export default class extends React.Component {
   constructor() {
@@ -74,6 +75,7 @@ export default class extends React.Component {
             } else {
               app_request("unsubscribe", "");
             }
+            iOS() && REMOVE_BADGE();
             await localStorage.clear();
             await new Promise((resolve) => setTimeout(resolve, 800));
             f7.dialog.close();
@@ -88,8 +90,10 @@ export default class extends React.Component {
     );
   };
 
-  handleClickBirthday = () => {
-    this.setState({ isOpen: true });
+  handleClickBirthday = (BirthDate) => {
+    if (!BirthDate) {
+      this.setState({ isOpen: true });
+    }
   };
 
   handleCancelBirthday = () => {
@@ -250,7 +254,7 @@ export default class extends React.Component {
             </div>
             <div
               className="page-detail-profile__item"
-              onClick={this.handleClickBirthday}
+              onClick={() => this.handleClickBirthday(memberInfo?.BirthDate)}
             >
               <div className="name">Ngày sinh</div>
               <div className="content">

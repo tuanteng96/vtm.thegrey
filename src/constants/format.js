@@ -159,7 +159,13 @@ export const groupbyDDHHMM = (arr, name = "BookDate") => {
         }
         g.items.push(item);
     })
-    return newArr;
+    return newArr.map(item => ({...item,
+        items: item.items.sort(function(left, right) {
+            return moment.utc(right[name]).diff(moment.utc(left[name]))
+        })
+    })).sort(function(left, right) {
+        return moment.utc(right.dayFull).diff(moment.utc(left.dayFull))
+    });
 }
 
 export const groupbyDDHHMM2 = (arr, key) => {

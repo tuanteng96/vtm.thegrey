@@ -42,6 +42,7 @@ import EmployeeServicePage from "../pages/employee/timeKeeping/employeeService";
 import EmployeeServiceDetailPage from "../pages/employee/timeKeeping/employeeServiceDetail";
 import EmployeeServiceDiaryPage from "../pages/employee/timeKeeping/employeeServiceDiary";
 import EmployeeServiceSchedulePage from "../pages/employee/timeKeeping/employeeServiceSchedule";
+import EmployeeServiceHistoryPage from "../pages/employee/timeKeeping/employeeServiceHistory";
 import EmployeeStatisticalPage from "../pages/employee/statistical/employeeStatistical";
 // Thống kê
 import ReportPage from "../pages/report/index";
@@ -327,6 +328,13 @@ var routes = [{
     {
         path: '/employee/schedule/:orderItem/', // Nhân viên lịch trình
         asyncComponent: () => EmployeeServiceSchedulePage,
+        options: {
+            transition: 'f7-cover',
+        }
+    },
+    {
+        path: '/employee/history/:orderItem/:memberId', // Nhân viên lịch sử
+        asyncComponent: () => EmployeeServiceHistoryPage,
         options: {
             transition: 'f7-cover',
         }

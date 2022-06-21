@@ -1,5 +1,14 @@
 import React from "react";
-import { f7, Link, Navbar, Page, Toolbar } from "framework7-react";
+import {
+  Button,
+  f7,
+  Link,
+  Navbar,
+  Page,
+  PageContent,
+  Sheet,
+  Toolbar,
+} from "framework7-react";
 import NotificationIcon from "../../../components/NotificationIcon";
 import ToolBarBottom from "../../../components/ToolBarBottom";
 import { getUser } from "../../../constants/user";
@@ -19,6 +28,10 @@ export default class employeeStatistical extends React.Component {
       isOpenDate: false,
       isDateCurrent: moment().format("DD/MM/YYYY"),
       monthCurrent: moment().format("MM/YYYY"),
+      sheetOpened: {
+        sheet1: false,
+        sheet2: false,
+      },
     };
   }
 
@@ -34,9 +47,19 @@ export default class employeeStatistical extends React.Component {
 
   numTotal = (arr) => {
     const initialValue = 0;
-    if(!arr) return initialValue;
+    if (!arr) return initialValue;
     let sum = arr.reduce(function (total, currentValue) {
       return total + currentValue.Value;
+    }, initialValue);
+
+    return sum;
+  };
+
+  numTotalQty = (arr) => {
+    const initialValue = 0;
+    if (!arr) return initialValue;
+    let sum = arr.reduce(function (total, currentValue) {
+      return total + currentValue.qty;
     }, initialValue);
 
     return sum;
@@ -84,7 +107,6 @@ export default class employeeStatistical extends React.Component {
     staffService
       .getSalary(userID, date)
       .then((response) => {
-        
         const result = response.data.data;
         setTimeout(() => {
           this.setState({
@@ -125,6 +147,50 @@ export default class employeeStatistical extends React.Component {
     this.setState({ isOpenDate: false });
   };
 
+  getValueConfig = (dataConfig, nameConfig) => {
+    if (!dataConfig) return 0;
+    const index = dataConfig.findIndex((item) => item.Name === nameConfig);
+    if (index > -1) {
+      return dataConfig[index].Value;
+    }
+    return 0;
+  };
+
+  OpenSheet = (sheet) => {
+    const { dataSalary } = this.state;
+    if (sheet === "sheet1") {
+      if (
+        dataSalary &&
+        dataSalary.NGAY_NGHI &&
+        dataSalary.NGAY_NGHI.length > 0
+      ) {
+        this.setState({
+          sheetOpened: {
+            sheet1: true,
+            sheet2: false,
+          },
+        });
+      }
+    }
+    if (sheet === "sheet2") {
+      this.setState({
+        sheetOpened: {
+          sheet1: false,
+          sheet2: true,
+        },
+      });
+    }
+  };
+
+  HideSheet = () => {
+    this.setState({
+      sheetOpened: {
+        sheet1: false,
+        sheet2: false,
+      },
+    });
+  };
+
   async loadRefresh(done) {
     const { monthCurrent } = this.state;
     await this.getSalary(monthCurrent);
@@ -133,8 +199,14 @@ export default class employeeStatistical extends React.Component {
   }
 
   render() {
-    const { dataSalary, isLoading, isOpenDate, isDateCurrent, monthCurrent } =
-      this.state;
+    const {
+      dataSalary,
+      isLoading,
+      isOpenDate,
+      isDateCurrent,
+      monthCurrent,
+      sheetOpened,
+    } = this.state;
     const dateConfig = {
       month: {
         caption: "Tháng",
@@ -205,7 +277,10 @@ export default class employeeStatistical extends React.Component {
               )}
 
               <div className="employee-statistical__item">
-                <div className="title">Lương cơ bản</div>
+                <div className="title" onClick={() => this.OpenSheet("sheet2")}>
+                  Lương theo chấm công{" "}
+                  <i className="fas fa-exclamation-circle text-warning pl-2px"></i>
+                </div>
                 <div className="head">
                   <div className="tr">
                     <div className="td w-1">STT</div>
@@ -224,9 +299,22 @@ export default class employeeStatistical extends React.Component {
                   </div>
                   <div className="tr">
                     <div className="td w-1">2</div>
-                    <div className="td w-2">Ngày công yêu cầu</div>
+                    <div
+                      className="td w-2"
+                      onClick={() => this.OpenSheet("sheet1")}
+                    >
+                      Trừ lương nghỉ{" "}
+                      {dataSalary &&
+                        dataSalary.NGAY_NGHI &&
+                        dataSalary.NGAY_NGHI.length > 0 && (
+                          <i className="fas fa-exclamation-circle text-warning pl-2px"></i>
+                        )}
+                    </div>
                     <div className="td w-3">
-                      {dataSalary && dataSalary.NGAY_CONG}
+                      {dataSalary &&
+                        formatPriceVietnamese(
+                          this.numTotal(dataSalary?.NGAY_NGHI)
+                        )}
                     </div>
                   </div>
                   <div className="tr">
@@ -237,7 +325,143 @@ export default class employeeStatistical extends React.Component {
                     </div>
                   </div>
                 </div>
+                <div className="tfooter">
+                  <div className="tr">
+                    <div className="td">Tổng</div>
+                    <div className="td">
+                      {dataSalary &&
+                        formatPriceVietnamese(
+                          dataSalary.LUONG_CO_BAN -
+                            this.numTotal(dataSalary?.NGAY_NGHI) +
+                            dataSalary.PHU_CAP
+                        )}
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              <Sheet
+                opened={sheetOpened.sheet2}
+                className={`sheet-detail sheet-detail-wallet sheet-detail-order`}
+                style={{
+                  height: "auto !important",
+                  "--f7-sheet-bg-color": "#fff",
+                }}
+                onSheetClosed={() => {
+                  this.HideSheet();
+                }}
+                swipeToClose
+                backdrop
+              >
+                <Button
+                  className="show-close sheet-close"
+                  onClick={() => this.HideSheet()}
+                >
+                  <i className="las la-times"></i>
+                </Button>
+                <PageContent>
+                  <div className="employee-statistical__item mb-0">
+                    <div className="title">Lương chính sách</div>
+                    <div className="head">
+                      <div className="tr">
+                        <div className="td w-1">STT</div>
+                        <div className="td w-2">Hạng mục</div>
+                        <div className="td w-3">Giá trị</div>
+                      </div>
+                    </div>
+                    <div className="tbody">
+                      <div className="tr">
+                        <div className="td w-1">1</div>
+                        <div className="td w-2">Lương cơ bản</div>
+                        <div className="td w-3">
+                          {dataSalary &&
+                            formatPriceVietnamese(
+                              dataSalary.LUONG_CO_BAN_THANG
+                            )}
+                        </div>
+                      </div>
+                      <div className="tr">
+                        <div className="td w-1">2</div>
+                        <div className="td w-2">Ngày công yêu cầu</div>
+                        <div className="td w-3">
+                          {dataSalary && dataSalary.NGAY_CONG}
+                        </div>
+                      </div>
+                      <div className="tr">
+                        <div className="td w-1">3</div>
+                        <div className="td w-2">Ngày nghỉ cho phép</div>
+                        <div className="td w-3">
+                          {dataSalary
+                            ? this.getValueConfig(
+                                dataSalary.UserSalaryConfig,
+                                "NGAY_PHEP"
+                              )
+                            : 0}
+                        </div>
+                      </div>
+                      <div className="tr">
+                        <div className="td w-1">4</div>
+                        <div className="td w-2">Phụ cấp</div>
+                        <div className="td w-3">
+                          {dataSalary &&
+                            formatPriceVietnamese(dataSalary.PHU_CAP)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </PageContent>
+              </Sheet>
+
+              <Sheet
+                opened={sheetOpened.sheet1}
+                className={`sheet-detail sheet-detail-wallet sheet-detail-order`}
+                style={{
+                  height: "auto !important",
+                  "--f7-sheet-bg-color": "#fff",
+                }}
+                onSheetClosed={() => {
+                  this.HideSheet();
+                }}
+                swipeToClose
+                backdrop
+              >
+                <Button
+                  className="show-close sheet-close"
+                  onClick={() => this.HideSheet()}
+                >
+                  <i className="las la-times"></i>
+                </Button>
+                <PageContent>
+                  {dataSalary && dataSalary.DS_NGAY_NGHI.length > 0 && (
+                    <div className="employee-statistical__item mb-0">
+                      <div className="title">Ngày nghỉ</div>
+                      <div className="head">
+                        <div className="tr">
+                          <div className="td w-1">STT</div>
+                          <div className="td w-2">Số buổi</div>
+                          <div className="td w-3">Tiền trừ</div>
+                        </div>
+                      </div>
+                      <div className="tbody">
+                        {dataSalary.NGAY_NGHI.map((item, index) => (
+                          <div className="tr" key={index}>
+                            <div className="td w-1">{index + 1}</div>
+                            <div className="td w-2">
+                              {item.Meta && JSON.parse(item.Meta)?.day} ngày
+                            </div>
+                            <div className="td w-3">
+                              <div className="text-danger fw-500">
+                                -{formatPriceVietnamese(item.Value)}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </PageContent>
+              </Sheet>
+
               <div className="employee-statistical__item">
                 <div className="title">Phạt</div>
                 <div className="head">
@@ -258,69 +482,17 @@ export default class employeeStatistical extends React.Component {
                         </div>
                       </div>
                     ))}
-                  {dataSalary &&
-                    this.totalDayOff(dataSalary.DS_NGAY_NGHI) -
-                      dataSalary.NGAY_NGHI_CHO_PHEP >
-                      0 && (
-                      <div className="tr">
-                        <div className="td w-1">
-                          {dataSalary.PHAT.length + 1}
-                        </div>
-                        <div className="td w-2">
-                          Ngày nghỉ (
-                          <span className="red">
-                            {" "}
-                            {this.totalDayOff(dataSalary.DS_NGAY_NGHI) -
-                              dataSalary.NGAY_NGHI_CHO_PHEP}{" "}
-                          </span>
-                          ngày quá hạn )
-                        </div>
-                        <div className="td w-3">
-                          {dataSalary &&
-                            formatPriceVietnamese(
-                              this.numTotal(dataSalary.NGAY_NGHI)
-                            )}
-                        </div>
-                      </div>
-                    )}
                 </div>
                 <div className="tfooter">
                   <div className="tr">
                     <div className="td">Tổng phạt</div>
                     <div className="td">
                       {dataSalary &&
-                        formatPriceVietnamese(
-                          this.numTotal(dataSalary.NGAY_NGHI) +
-                            this.numTotal(dataSalary.PHAT)
-                        )}
+                        formatPriceVietnamese(this.numTotal(dataSalary.PHAT))}
                     </div>
                   </div>
                 </div>
               </div>
-              {dataSalary && dataSalary.DS_NGAY_NGHI.length > 0 && (
-                <div className="employee-statistical__item">
-                  <div className="title">Ngày nghỉ</div>
-                  <div className="head">
-                    <div className="tr">
-                      <div className="td w-1">STT</div>
-                      <div className="td w-2">Ngày</div>
-                      <div className="td w-3">Số buổi</div>
-                    </div>
-                  </div>
-                  <div className="tbody">
-                    {dataSalary.DS_NGAY_NGHI.map((item, index) => (
-                      <div className="tr" key={index}>
-                        <div className="td w-1">{index + 1}</div>
-                        <div className="td w-2">
-                          Từ ngày {moment(item.day).format("L")} đến ngày{" "}
-                          {moment(item.day).add(item.qty, "days").format("L")}
-                        </div>
-                        <div className="td w-3">{item.qty} buổi</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
               <div className="employee-statistical__item">
                 <div className="title">
                   Lương dịch vụ (

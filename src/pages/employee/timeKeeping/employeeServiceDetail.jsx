@@ -354,11 +354,7 @@ export default class employeeServiceDetail extends React.Component {
             <div className="page-navbar__back">
               <Link
                 onClick={() =>
-                  this.$f7router.back("/employee/service/", {
-                    force: true,
-                    ignoreCache: true,
-                    reload: true,
-                  })
+                  this.$f7router.back()
                 }
               >
                 <i className="las la-angle-left"></i>
@@ -404,6 +400,22 @@ export default class employeeServiceDetail extends React.Component {
                   <span>
                     {formatPriceVietnamese(
                       itemDetail && itemDetail.member.Present.no
+                    )}
+                  </span>
+                </li>
+                <li>
+                  <span>Ví</span>
+                  <span>
+                    {formatPriceVietnamese(
+                      itemDetail && itemDetail.member.Present.nap_vi
+                    )}
+                  </span>
+                </li>
+                <li>
+                  <span>Thẻ tiền</span>
+                  <span>
+                    {formatPriceVietnamese(
+                      itemDetail && itemDetail.member.Present.the_tien_kha_dung
                     )}
                   </span>
                 </li>

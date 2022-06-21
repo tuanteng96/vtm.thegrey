@@ -18,6 +18,8 @@ import '../assets/libs/animate/animate.min.css';
 
 import './../assets/libs/line-awesome-1.3.0/css/line-awesome.min.css';
 
+import './../assets/libs/font-awesome-pro/css/all.min.css';
+
 import './../assets/libs/linearicons/svgembedder.min.js';
 
 import '../css/app.scss';

@@ -13,7 +13,7 @@ export default class SkeletonService extends React.Component {
   render() {
     return (
       <React.Fragment>
-        {Array(5)
+        {Array(1)
           .fill()
           .map((item, index) => (
             <div key={index}>

@@ -12,7 +12,8 @@ import { Page, Link, Toolbar, Row, Col, f7 } from "framework7-react";
 import ToolBarBottom from "../../components/ToolBarBottom";
 import UserService from "../../service/user.service";
 import Skeleton from "react-loading-skeleton";
-import { SEND_TOKEN_FIREBASE } from "../../constants/prom21";
+import { REMOVE_BADGE, SEND_TOKEN_FIREBASE, SET_BADGE } from "../../constants/prom21";
+import { iOS } from "../../constants/helpers";
 
 export default class extends React.Component {
   constructor() {
@@ -58,6 +59,7 @@ export default class extends React.Component {
           } else {
             app_request("unsubscribe", "");
           }
+          iOS() && REMOVE_BADGE();
           await localStorage.clear();
           await new Promise((resolve) => setTimeout(resolve, 800));
           f7.dialog.close();

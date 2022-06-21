@@ -23,7 +23,7 @@ function WalletCardModal({ sheetOpened, hideOpenSheet }) {
         .catch((error) => console.log(error));
     }
   }, [sheetOpened]);
-  console.log(sheetOpened);
+
   return (
     <Sheet
       opened={sheetOpened.open}

@@ -17,8 +17,8 @@ class UserService {
     getSubscribe(usn, isUser, token) {
         return http.get(`/app/index.aspx?cmd=authen&USN=${usn}&token=${token}&IsUser=${isUser}`);
     }
-    getListTagService(username, password, memberid) {
-        return http.get(`/services/preview.aspx?a=1&token=${getToken()}&cmd=loadOrderService&MemberID=${memberid}&IsMember=1&fromOrderAdd=0`);
+    getListTagService(memberid, ismember) {
+        return http.get(`/services/preview.aspx?a=1&token=${getToken()}&cmd=loadOrderService&MemberID=${memberid}&IsMember=${ismember}&fromOrderAdd=0`);
     }
     getBarCode(memberid) {
         return http.get(`/services/preview.aspx?cmd=Barcode&mid=${memberid}`);
@@ -69,6 +69,9 @@ class UserService {
     }
     postReviews(memberid, data) {
         return http.post(`/api/v3/OrderService?cmd=get_service_unrate&mid=${memberid}`, data);
+    }
+    getListProductMember(memberid, Ps) {
+        return http.get(`/api/v3/member23?cmd=da_mua&memberid=${memberid}&ps=${Ps}`);
     }
     getNotification(acctype, accid, offset, next) {
         return http.get(`/api/v3/noti2?cmd=nextoffset&acctype=${acctype}&accid=${accid}&offset=${offset}&next=${next}`);

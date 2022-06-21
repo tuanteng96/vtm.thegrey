@@ -44,7 +44,7 @@ export default class extends React.Component {
     this.setState({
       loading: true,
     });
-    UserService.getListTagService(username, password, memberid)
+    UserService.getListTagService(memberid, 1)
       .then(({ data }) => {
         this.setState({
           countSv: data.length || 0,
